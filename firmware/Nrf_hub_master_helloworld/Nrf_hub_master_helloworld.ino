@@ -1,3 +1,36 @@
+/*
+ This program receives data from up to 5 nodes printing them on the serial peripheral.
+ Additionaly it receives serial packets from the serial peripheral and sends data to the equivalent node.
+ the ascii packet has the following shape:
+
+ +-------+-------++-------+-------+---------------+             +-------+-------+---------------++---------------+
+ |command||  node||   seperrator  |   number      |             |   seperrator  |   number      ||   end of      |
+ | type  ||   ID ||               |               |  up to      |               |               ||   packet      |
+ +---------------++---------------+---------------+  5 numbers  +---------------+---------------++---------------+
+ |1ascii ||1ascii||    1ascii     | up to 6 digits|  . . .      |    1ascii     | up to 6 digits|| one ascc      |
+ +-+-+-+-+-+-+-+-++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-+-+-+-+-+-+
+ |a to Z ||  1-5 ||     "/"       |number ascii   |             |     "/"       |number ascii   ||  "/n"         |
+ +-------+-------++-------+-------+---------------+             +-------+-------+---------------++---------------+
+
+example
+ "F1/100/101/102/103/104/n"
+ this string will send to node 1 the command assigned to F with 4 different number fields.
+
+ 2 bytes addr data pipes to the beginning of the payloads. The sender will send and
+ receive the payload on the same sender/receiver address.
+ attention! the packet must not exceed 32bytes
+
+ This example is based on examples found on Rf24 library:
+ Forked RF24 at github :-
+ https://github.com/stanleyseow/RF24
+
+
+ Written by Papamichalis Pavlos
+ pp_papamichalis@hotmail.com
+ */
+
+
+
 
 
 
@@ -15,9 +48,7 @@ const char MaxChars = 40; // an int string contains up to 5 digits and is termin
 char strValue[MaxChars+1]; // must be big enough for digits and terminating null
 int index = 0;
 
-const char NUMBER_OF_FIELDS = 5; // how many comma separated fields we expect
-char fieldIndex = 0; // the current field being received
-int values[NUMBER_OF_FIELDS];
+
 char i;
 
 
@@ -31,7 +62,7 @@ const uint64_t listening_pipes[6] = {
 
 
 
-byte command_type,unit;
+byte unit;
 //boolean analog_mode_flag,analog_mode_unit1_flag,analog_mode_unit2_flag,analog_mode_unit3_flag,analog_mode_unit4_flag,analog_mode_unit5_flag,analog_mode_unitall_flag;
 
 //char command_packet_size = 0;
@@ -56,45 +87,6 @@ boolean get_string(){
     }
   }
 }
-
-//boolean get_values(){
-//  for ( i=0; i<strlen(strValue); i++){
-//    Serial.print(strValue[i]);
-//  }
-//  Serial.println();
-//  if (get_string()==1){///read a string of alphanumeric
-//    for ( i=1; i<strlen(strValue)+1; i++){
-//
-//      char ch = strValue[i];
-//      if(ch>= '0' && ch <= '9') // is this an ascii digit between 0 and 9?
-//      {
-//        // yes, accumulate the value
-//        values[fieldIndex] = (values[fieldIndex] * 10) + (ch - '0');
-//      }
-//      else if (ch == '/') // comma is our separator, so move on to the next field
-//      {
-//        if(fieldIndex < NUMBER_OF_FIELDS-1)
-//          fieldIndex++; // increment field index
-//      }
-//      else
-//      {
-//        //        Serial.print("1= ");
-//        //        Serial.println(values[0]);
-//        //        Serial.print("2= ");
-//        //        Serial.println(values[1]);
-//        //        Serial.print("3= ");
-//        //        Serial.println(values[2]);
-//        //        Serial.print("4= ");
-//        //        Serial.println(values[3]);
-//        //        Serial.print("5= ");
-//        //        Serial.println(values[4]);
-//
-//      }
-//    }
-//    return(1);
-//  }
-//}
-
 
 
 
@@ -137,72 +129,47 @@ void loop(void)
 
   if (get_string()==1){
     Serial_data();
+
+//  char outBuffer[32]="";
+//    strcat(outBuffer,"012");
+//    // Sending back reply to sender using the same pipe
+//    radio.stopListening();
+//    radio.openWritingPipe(listening_pipes[1]);
+//      // Open the correct pipe for writing
+//    //radio.openWritingPipe(pipes[1]);
+//    //radio.write(receivePayload,len);
+//
+//    if ( radio.write( outBuffer,  strlen(outBuffer)) ) {
+//       printf("Send successful\n\r"); 
+//
+//    }
+//    else {
+//       printf("Send failed------------------------------------------\n\r");
+//
+//    }
+
+
+   
   } 
   nrfhub_data();
 }
 
-  //  char receivePayload[31];
-  //
-  //  //command_manipulation();
-  //
-  //
-  //  uint8_t len = 0;
-  //  uint8_t pipe = 1;
-  //  // Loop thru the pipes 0 to 5 and check for payloads
-  //  if ( radio.available( &pipe)  ) {
-  //
-  //    len = radio.getDynamicPayloadSize();
-  //    radio.read( &receivePayload,len);
-  //    receivePayload[len] = 0;
-  //    printf("Got payload: %s len:%i pipe:%i    %i\n\r",receivePayload,len,pipe,i);
-  //    // Sending back reply to sender using the same pipe
-  //
-  //
-  //
-  //    // Increase pipe and reset to 0 if more than 5
-  //    pipe++;
-  //    if ( pipe > 5 ) pipe = 0;
-  //    i++; 
-  //
-  //  }
-
-  //    radio.stopListening();
-  //    // radio.openWritingPipe(listening_pipes[pipe-1]);
-  //    // Open the correct pipe for writing
-  //    radio.openWritingPipe(listening_pipes[0]);
-  //    //radio.write(receivePayload,len);
-  //
-  //    if ( radio.write( receivePayload, len) ) {
-  //      printf("Send successful\n\r"); 
-  //
-  //    }
-  //    else {
-  //      printf("Send failed------------------------------------------\n\r");
-  //
-  //    }
-  //    // Format string for printing ending with 0
-  //    receivePayload[len] = 0;
-  //    printf("Got payload: %s len:%i pipe:%i\n\r",receivePayload,len,pipe);
-  //
-  //    //radio.openReadingPipe(1,pipes[1]);
-  //    radio.startListening();
-  //    i=0;
-
-  //delay(1);
+ 
 
 
 void Serial_data(){
 
   char unit=strValue[1]-'0';
-//  Serial.println(unit,DEC);
-//  Serial.println(strValue);
+  Serial.println(unit,DEC);
+  Serial.println(strValue);
   radio.stopListening();
   radio.openWritingPipe(listening_pipes[unit]);
   //unsigned int previousMillis=millis();
-  char outBuffer[20]="";
+  char outBuffer[32]="";
   strcat(outBuffer, strValue);
+  
   //int latch;
-  if ( radio.write( strValue, strlen(strValue)) ) {
+  if ( radio.write( outBuffer, strlen(outBuffer)) ) {
 
     sprintf(outBuffer,"T%01d/%s",unit,strValue);
     //sprintf(Buffer,"T");
@@ -214,7 +181,7 @@ void Serial_data(){
     sprintf(outBuffer,"E%01d/%s",unit,strValue);
     Serial.println(outBuffer);
   }
-  radio.startListening();
+  
   
 }
 
@@ -223,7 +190,7 @@ void nrfhub_data(){
   uint8_t len = 1;
   uint8_t pipe = 1;
 
-    
+    radio.startListening();
     if ( radio.available( &pipe)  ) {
   
       len = radio.getDynamicPayloadSize();
@@ -239,5 +206,3 @@ void nrfhub_data(){
   
     }
 }
-
-
