@@ -1,12 +1,13 @@
-#ifndef __Hardware_H
-#define __Hardware_H
+#ifndef __config_H
+#define __config_H
 
 
 //voltage deivider R1=3.3K R2= 1K Vin=4.3 Vout=
-#define Baudrate 115200
-#define command_packet_maxm_size  10 // maximum number of bytes in the incoming packet
+#define Baudrate 38400
 
-#define command_type receivePayload[0]
+
+
+
 
 #define cmd_request_firmware_edition 'F' //128
 #define cmd_change_color             'C' //008 + unit select
@@ -20,7 +21,7 @@
 
 
 
-#endif //__Hardware_H
+#endif //__config_H
 
 
 /*

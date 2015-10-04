@@ -18,8 +18,7 @@
  Written by Stanley Seow
  stanleyseow@gmail.com
  */
-#include "hardware.h"
-
+#include "config.h"
 #include <SPI.h>
 #include "nRF24L01.h"
 #include "RF24.h"
@@ -27,7 +26,7 @@
 
 //#define RF_SETUP 0x17
 
-#define node 1 //1to5
+
 // Set up nRF24L01 radio on SPI pin for CE, CSN
 RF24 radio(9,10);
 
@@ -55,13 +54,13 @@ const uint64_t listening_pipes[5] = {
 // const uint64_t pipes[2] = { 0xF0F0F0F0E5LL, 0xF0F0F0F0E5LL };
 // Pipe0 is F0F0F0F0D2 ( same as reading pipe )
 
-char receivePayload[32];
+char receivePayload[30];
 uint8_t counter=0;
 
 
 
 
-boolean get_values(char strValue[32] ){
+boolean get_values(char strValue[30] ){
 
   
   char fieldIndex = 0; // the current field being received
@@ -173,7 +172,7 @@ void loop(void)
 
 
   // Get readings from sensors, change codes below to read sensors
-  Data1 = counter++;
+  //Data1 = counter++;
   //Data2 = analogRead(0);
   //Data3 = analogRead(1);
   //Data4 = random(0,1000);
@@ -195,13 +194,13 @@ void loop(void)
   previousMillis=currentMillis;
   
   //Serial.println(send_time);
-  sprintf(temp,"%04d",send_time);
-  strcat(outBuffer,temp);
+//  sprintf(temp,"%04d",send_time);
+//  strcat(outBuffer,temp);
 
   //strcat(outBuffer,",");
 
-  //sprintf(temp,"%04d",Data2);
-  //strcat(outBuffer,temp);
+  sprintf(temp,"%04d",send_time);
+  strcat(outBuffer,temp);
 
   //strcat(outBuffer,",");
 
@@ -225,7 +224,7 @@ void loop(void)
 
   //lcd.clear();
   //lcd.setCursor(0,0);
- delay(100);
+ 
  
 
   // Stop listening and write to radio
@@ -234,7 +233,8 @@ void loop(void)
   // Send to hub
   if ( radio.write( outBuffer, strlen(outBuffer)) ) {
     printf("Send successful\n\r");
-
+    
+   Serial.println(outBuffer);
   }
   else {
     printf("Send failed---------------------------------------------------\n\r");
@@ -257,7 +257,7 @@ void loop(void)
 //  //     delay(1);
 //  //   } // End while
 //
-//delay(250);
+delay(50);
 //         uint8_t len = radio.getDynamicPayloadSize();
 //         radio.read( receivePayload, len);
 //
