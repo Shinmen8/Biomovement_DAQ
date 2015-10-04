@@ -5,8 +5,7 @@
 
  The receiver is a RPi or UNO accepting 6 pipes and display received payload to the screen
 
- The receiver will return the receive payload for sender to calculate the rtt
- if the string compared matched to the lcd display
+ The receiver will return the receive payload for sender to calculate the rtthe string compared matched to the lcd display
 
  Max payload size is 32 bytes
 
