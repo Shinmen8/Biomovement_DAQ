@@ -1,22 +1,22 @@
 /*
- This program sends readings from four or more sensor readings and appends
- 2 bytes addr data pipes to the beginning of the payloads. The sender will send and
- receive the payload on the same sender/receiver address.
+ This program reads commands fromthe master and sends sensor readings acoording to a delay.
+ The user needs to choose the node number.
 
- The receiver is a RPi or UNO accepting 6 pipes and display received payload to the screen
+ 
 
  The receiver will return the receive payload for sender to calculate the rtthe string compared matched to the lcd display
 
  Max payload size is 32 bytes
 
+ This example is based on examples found on Rf24 library:
  Forked RF24 at github :-
  https://github.com/stanleyseow/RF24
 
- Date : 28/03/2013
 
- Written by Stanley Seow
- stanleyseow@gmail.com
+ Written by Papamichalis Pavlos
+ pp_papamichalis@hotmail.com
  */
+ 
 #include "config.h"
 #include <SPI.h>
 #include "nRF24L01.h"
@@ -40,12 +40,11 @@ int  values[NUMBER_OF_FIELDS];
 
 //const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0x7365727631LL };
 
-const uint64_t talking_pipes[5] = {
-  0xF0F0F0F0D2LL, 0xF0F0F0F0C3LL, 0xF0F0F0F0B4LL, 0xF0F0F0F0A5LL, 0xF0F0F0F096LL
-};
-const uint64_t listening_pipes[5] = {
-  0x3A3A3A3AD2LL, 0x3A3A3A3AC3LL, 0x3A3A3A3AB4LL, 0x3A3A3A3AA5LL, 0x3A3A3A3A96LL
-};
+const uint64_t talking_pipes[5] =   { 
+   0xF0D2LL, 0xF0C3LL, 0xF0B4LL, 0xF0A5LL, 0xF096LL };
+const uint64_t listening_pipes[6] = { 
+   0x3AD2LL, 0x3AC3LL, 0x3AB4LL, 0x3AA5LL, 0x3A96LL };
+
 unsigned long send_time = 0, previousMillis = 0, rtt = 0;
 
 
@@ -121,7 +120,7 @@ void setup(void)
   // Setup LCD
 
 
-  Serial.begin(38400);
+  Serial.begin(Baudrate);
 
   printf_begin();
   printf("Sending nodeID & 4 sensor data\n\r");
@@ -138,7 +137,9 @@ void setup(void)
   radio.setRetries(0, 15);
   radio.setAutoAck(1);
   radio.enableAckPayload();
-  radio.setCRCLength(RF24_CRC_16);
+  radio.setCRCLength(RF24_CRC_8 );
+  radio.setAddressWidth(3);
+  radio.enableAckPayload();	
 
 
   radio.openWritingPipe(talking_pipes[node - 1]);
@@ -157,10 +158,10 @@ void loop(void)
 {
 
   command_received();
-  delay(250); /// !!!!!!!!!!!!!!! this delay must be after the command receive if you send more data in this delay time then the data wont be sent
+  delay(10); /// !!!!!!!!!!!!!!! this delay must be after the command receive if you send more data in this delay time then the data wont be sent
 
 
-  uint8_t Data1, Data2, Data3, Data4 = 0;
+  //uint8_t Data1, Data2, Data3, Data4 = 0;
   char temp[5];
 
 
@@ -179,7 +180,7 @@ void loop(void)
   //Data3 = analogRead(1);
   //Data4 = random(0,1000);
 
-  if ( counter > 999 ) counter = 0;
+ // if ( counter > 999 ) counter = 0;
 
   // Append the hex nodeID to the beginning of the payload
   //sprintf(outBuffer,"%2X",node);
@@ -236,7 +237,7 @@ void loop(void)
   if ( radio.write( outBuffer, strlen(outBuffer)) ) {
     printf("Send successful\n\r");
 
-    Serial.println(outBuffer);
+    //Serial.println(outBuffer);
   }
   else {
     printf("Send failed---------------------------------------------------\n\r");
@@ -272,7 +273,7 @@ void loop(void)
 void command_received() {
 
   radio.startListening();
-  delay(1);
+  //delay(1);
   if ( radio.available() ) {
     
     //    for (char i=0; i<strlen(receivePayload); i++){

@@ -2,18 +2,17 @@
 #define __config_H
 
 
-//voltage deivider R1=3.3K R2= 1K Vin=4.3 Vout=
-#define Baudrate 38400
+#define Baudrate 115200  //for 8mhz use 38400
 
 
 
 
-
-#define cmd_request_firmware_edition 'F' //128
-#define cmd_change_color             'C' //008 + unit select
-#define cmd_analog_mode_start    'A'//144
-#define cmd_analog_read_stop     'S'//152
-#define cmd_maxValue_mode_start     'M'//152
+//
+//#define cmd_request_firmware_edition 'F' //128
+//#define cmd_change_color             'C' //008 + unit select
+//#define cmd_analog_mode_start    'A'//144
+//#define cmd_analog_read_stop     'S'//152
+//#define cmd_maxValue_mode_start     'M'//152
 
 
 
