@@ -8,6 +8,7 @@
 
 //voltage deivider R1=3.3K R2= 1K Vin=4.3 Vout=
 #define Baudrate 38400
+#define timer_config 10000//10ms
 #define command_packet_maxm_size  10 // maximum number of bytes in the incoming packet
 
 #define command_type receivePayload[0]

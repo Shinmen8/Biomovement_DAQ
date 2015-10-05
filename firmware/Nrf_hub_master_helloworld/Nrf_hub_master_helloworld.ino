@@ -36,7 +36,7 @@ example
 
 
 
-RF24 radio(9,10);
+RF24 radio(9,10); // Set up nRF24L01 radio on SPI pin for CE, CSN
 
 
 
@@ -109,7 +109,7 @@ void setup(void)
   radio.openReadingPipe(5,talking_pipes[5]);
 
   radio.startListening();
-  radio.printDetails();
+  radio.printDetails();  // Dump the configuration of the rf unit for debugging
 
   delay(1000);
 
@@ -157,7 +157,7 @@ void Serial_data(){
 
 
 void nrfhub_data(){
-  char receivePayload[31];
+  uint8_t receivePayload[31];
   uint8_t len = 1;
   uint8_t pipe = 1;
 
@@ -168,7 +168,13 @@ void nrfhub_data(){
       radio.read( &receivePayload,len);
       receivePayload[len] = 0;
       //printf("%s",receivePayload);
-      printf("Got payload: %s len:%i pipe:%i\n\r",receivePayload,len,pipe);
+      Serial.print("Got payload:");
+      Serial.print(receivePayload[0],DEC);
+      Serial.print("   ");
+      Serial.print(receivePayload[1],DEC);
+      Serial.print("   ");
+      printf("len:%i pipe:%i\n\r",len,pipe);
+      //printf("Got payload: %s len:%i pipe:%i\n\r",receivePayload,len,pipe);
       //Serial.println();
 
       pipe++;
