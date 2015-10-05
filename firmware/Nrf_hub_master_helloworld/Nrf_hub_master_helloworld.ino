@@ -173,6 +173,8 @@ void nrfhub_data(){
       Serial.print("   ");
       Serial.print(receivePayload[1],DEC);
       Serial.print("   ");
+      Serial.print(receivePayload[2],DEC);
+      Serial.print("   ");
       printf("len:%i pipe:%i\n\r",len,pipe);
       //printf("Got payload: %s len:%i pipe:%i\n\r",receivePayload,len,pipe);
       //Serial.println();

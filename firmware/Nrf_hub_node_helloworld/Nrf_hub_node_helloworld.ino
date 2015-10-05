@@ -2,8 +2,9 @@
  This program reads commands fromthe master and sends sensor readings acoording to a timer set by the user.
  The user needs to choose the node number.
 
+ the packet set has this 
  
-
+ 
 
 
  Max payload size is 32 bytes
@@ -212,9 +213,13 @@ void loop(void)
   //  strcat(outBuffer,temp);
 
   //strcat(outBuffer,",");
-  
-  outBuffer[0]=(char)send_time;
+  outBuffer[0]=(char)node;
   outBuffer[1]=(char)counter;
+  outBuffer[2]=(char)send_time;
+  //outBuffer[3]=(char)send_time;
+  //outBuffer[4]=(char)send_time;
+  
+  
   //sprintf(temp, "%03d", send_time);
   //strcat(outBuffer, temp);
   
