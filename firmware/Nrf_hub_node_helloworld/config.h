@@ -3,12 +3,16 @@
 
 
 
-#define node 1 //1to5
+#define node_address 2 //1to5
 
+//#define node_type 3dsensor_Goniometer
+//#define node_type 3dsensor_Goniometer_emg
+//#define node_type 3dsensor_Goniometer_foot
+//#define node_type balance_board
 
 //voltage deivider R1=3.3K R2= 1K Vin=4.3 Vout=
 #define Baudrate 38400
-#define timer_config 10000//10ms
+#define default_timer_config 10000//10ms
 #define command_packet_maxm_size  10 // maximum number of bytes in the incoming packet
 
 #define command_type receivePayload[0]
@@ -17,9 +21,7 @@
 #define cmd_change_color             'C' //008 + unit select
 #define cmd_analog_mode_start    'A'//144
 #define cmd_analog_read_stop     'S'//152
-#define cmd_maxValue_mode_start     'M'//152
-
-
+#define cmd_maxValue_mode_start     'M'//15
 
 
 

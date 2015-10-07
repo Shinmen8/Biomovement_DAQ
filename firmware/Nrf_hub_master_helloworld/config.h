@@ -5,6 +5,14 @@
 #define Baudrate 115200  //for 8mhz use 38400
 
 
+// Radio pipe addresses. You can save here up to 255 different addresses 
+
+
+
+
+
+
+
 
 
 //
@@ -16,7 +24,8 @@
 
 
 
-
+//commands
+//responds
 
 
 

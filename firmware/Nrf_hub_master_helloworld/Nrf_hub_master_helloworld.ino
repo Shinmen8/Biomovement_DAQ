@@ -36,44 +36,48 @@ example
 
 
 
-RF24 radio(9,10); // Set up nRF24L01 radio on SPI pin for CE, CSN
+RF24 radio(9, 10); // Set up nRF24L01 radio on SPI pin for CE, CSN
+
+const uint64_t talking_pipes[6] =   {
+  0, 0xF0D2LL, 0xF0C3LL, 0xF0B4LL, 0xF0A5LL, 0xF096LL
+};
+const uint64_t listening_pipes[6] = {
+  0, 0x3AD2LL, 0x3AC3LL, 0x3AB4LL, 0x3AA5LL, 0x3A96LL
+};
 
 
 
-// Radio pipe addresses for the 5 nodes to communicate.
-
-const uint64_t talking_pipes[6] =   { 
-  0, 0xF0D2LL, 0xF0C3LL, 0xF0B4LL, 0xF0A5LL, 0xF096LL };
-const uint64_t listening_pipes[6] = { 
-  0, 0x3AD2LL, 0x3AC3LL, 0x3AB4LL, 0x3AA5LL, 0x3A96LL };
+uint32_t connected_talking_pipes[6];
+uint32_t connected_listening_pipes[6];
+uint8_t  connected_nodes = 0;
 
 
-
-
+const char NUMBER_OF_FIELDS = 2; // how many comma separated fields we expect
+int  values[NUMBER_OF_FIELDS];
 
 const char MaxChars = 40; // an int string contains up to 5 digits and is terminated by a 0 to indicate end of string
-char strValue[MaxChars+1]; // must be big enough for digits and terminating null
+char strValue[MaxChars + 1]; // must be big enough for digits and terminating null
 int index = 0;
 
 char i;
 byte unit;
 
 
-boolean get_string(){
+boolean get_string() {  // receive data from the serial communication
 
   // the index into the array storing the received digits
-  if( Serial.available()) {
+  if ( Serial.available()) {
     char ch = Serial.read();
-    Serial.println(ch);
-    if(index < MaxChars && ch >= '!' && ch <= 'z'){
+    //Serial.println(ch);
+    if (index < MaxChars && ch >= '!' && ch <= 'z') {
       strValue[index++] = ch; // add the ASCII character to the string;
-      return(0);
+      return (0);
     }
-    else{
+    else {
       // end here when buffer full or on the first non digit
       strValue[index] = 0; // terminate the string with a 0
-      index=0;
-      return(1);
+      index = 0;
+      return (1);
     }
   }
 }
@@ -94,21 +98,21 @@ void setup(void)
   radio.setChannel(70);
   radio.enableDynamicPayloads();
   radio.setAutoAck(1);
-  radio.setRetries(0,15);
+  radio.setRetries(0, 15);
   radio.enableAckPayload();
   radio.setCRCLength(RF24_CRC_8 );
   radio.setAddressWidth(3);
-  radio.enableAckPayload();  
+  radio.enableAckPayload();
 
 
   //radio.openWritingPipe(pipes[0]);
-  radio.openReadingPipe(1,talking_pipes[1]);
-  radio.openReadingPipe(2,talking_pipes[2]);
-  radio.openReadingPipe(3,talking_pipes[3]);
-  radio.openReadingPipe(4,talking_pipes[4]);
-  radio.openReadingPipe(5,talking_pipes[5]);
-
-  radio.startListening();
+//  radio.openReadingPipe(1, talking_pipes[1]);
+//  radio.openReadingPipe(2, talking_pipes[2]);
+//  radio.openReadingPipe(3, talking_pipes[3]);
+//  radio.openReadingPipe(4, talking_pipes[4]);
+//  radio.openReadingPipe(5, talking_pipes[5]);
+//
+//  radio.startListening();
   radio.printDetails();  // Dump the configuration of the rf unit for debugging
 
   delay(1000);
@@ -116,72 +120,225 @@ void setup(void)
 }
 
 
+
 void loop(void)
 {
 
 
-  if (get_string()==1){  //if serial data received send to nodes
-    Serial_data(); 
-  } 
-  nrfhub_data();        //if nrf data print to serial
+  if (get_string() == 1) { //if serial data received send to nodes
+    Serial_data();
+  }
+  nrfhub_data();         //if nrf data print to serial
 }
 
- 
 
 
-void Serial_data(){
 
-  char unit=strValue[1]-'0';
-  Serial.println(unit,DEC);
-  Serial.println(strValue);
+void Serial_data() {
+
+
+  if (strValue[0] == 'C') {
+    check_connected_nodes();
+  }
+  else if (strValue[0] == 'B') {
+    //   get_values();
+    command_start();
+
+  }
+
+
+
+  else {
+    char unit = strValue[1] - '0';
+    Serial.println(unit, DEC);
+    Serial.println(strValue);
+    radio.stopListening();
+    radio.openWritingPipe(listening_pipes[unit]);
+    //unsigned int previousMillis=millis();
+    char outBuffer[32] = "";
+    strcat(outBuffer, strValue);
+
+    //int latch;
+    if ( radio.write( outBuffer, strlen(outBuffer)) ) {
+
+      sprintf(outBuffer, "T%01d/%s", unit, strValue);
+      //sprintf(Buffer,"T");
+      Serial.println(outBuffer);
+    }
+    else {
+      //latch=previousMillis-millis();
+      //sprintf(Buffer,"E%01d/%4d/%s",unit,latch,strValue);
+      sprintf(outBuffer, "E%01d/%s", unit, strValue);
+      Serial.println(outBuffer);
+    }
+  }
+
+}
+
+
+void nrfhub_data() {
+  uint8_t receivePayload[31];
+  uint8_t len = 1;
+  uint8_t pipe = 1;
+
+  radio.startListening();
+  if ( radio.available( &pipe)  ) {
+
+    len = radio.getDynamicPayloadSize();
+    radio.read( &receivePayload, len);
+    receivePayload[len] = 0;
+    //printf("%s",receivePayload);
+    Serial.print("Got payload:");
+    Serial.print(pipe, DEC);
+    Serial.print("   ");
+    Serial.print(receivePayload[1], DEC);
+    Serial.print("   ");
+    Serial.println(receivePayload[2], DEC);
+    // Serial.print("   ");
+    // printf("len:%i pipe:%i\n\r",len,pipe);
+    //printf("Got payload: %s len:%i pipe:%i\n\r",receivePayload,len,pipe);
+    //Serial.println();
+
+    pipe++;
+    Serial.println(pipe);
+    if ( pipe > connected_nodes ) pipe = 1;
+
+
+  }
+}
+
+
+
+
+
+boolean get_values(char strValue[30] ) {
+
+
+  char fieldIndex = 0; // the current field being received
+
+
+
+  for (int i = 0; i <= fieldIndex; i++) { //Serial.println(values[i]);
+    values[i] = 0; // set the values to zero, ready for the next message
+  }
+  fieldIndex = 0; // ready to start over
+  //  for ( char i=0; i<strlen(strValue); i++){
+  //    Serial.print(strValue[i]);
+  //  }
+  //  Serial.println();
+  // if (get_string()==1){///read a string of alphanumeric
+  for (char i = 1; i < strlen(strValue) + 1; i++) {
+
+    char ch = strValue[i];
+    if (ch >= '0' && ch <= '9') // is this an ascii digit between 0 and 9?
+    {
+      // yes, accumulate the value
+      values[fieldIndex] = (values[fieldIndex] * 10) + (ch - '0');
+    }
+    else if (ch == '/') // comma is our separator, so move on to the next field
+    {
+      if (fieldIndex < NUMBER_OF_FIELDS - 1)
+        fieldIndex++; // increment field index
+    }
+    else
+    {
+          //  Serial.print("1= ");
+         //   Serial.println(values[0]);
+        //    Serial.print("2= ");
+       //     Serial.println(values[1]);
+      //      Serial.print("3= ");
+      //      Serial.println(values[2]);
+      //      Serial.print("4= ");
+      //      Serial.println(values[3]);
+      //      Serial.print("5= ");
+      //      Serial.println(values[4]);
+
+    }
+  }
+
+  return (1);
+
+}
+
+
+
+void check_connected_nodes() {
+
+  Serial.println("searching for devices");
+  uint8_t i = 0;
+
+  for (int address = 1; address <= 6; address++) {
+
+    //radio.openReadingPipe(address, talking_pipes[address]);
+
+    radio.stopListening();
+    radio.openWritingPipe(listening_pipes[address]);
+    char outBuffer[32] = "";
+    strcat(outBuffer, strValue);
+
+    if ( radio.write( outBuffer, strlen(outBuffer)) ) {
+      i++;
+      connected_listening_pipes[i] = listening_pipes[address];
+      connected_talking_pipes[i] = talking_pipes[address];
+      sprintf(outBuffer, "T%01d/%s", address, strValue);
+      //sprintf(Buffer,"T");
+      Serial.println(outBuffer);
+    }
+    else {
+      //latch=previousMillis-millis();
+      //sprintf(Buffer,"E%01d/%4d/%s",unit,latch,strValue);
+      sprintf(outBuffer, "E%01d/%s", address, strValue);
+      
+      Serial.println(outBuffer);
+    }
+    delay(100);
+  }
+
+  connected_nodes = i;
+
+  Serial.print("nodes found:");
+  Serial.println(connected_nodes);
+  for (int k = 1; k <= connected_nodes; k++) {
+    radio.openReadingPipe(k, connected_talking_pipes[k]);
+    Serial.print(connected_talking_pipes[k],HEX);
+    Serial.print("   ");
+    Serial.println(connected_listening_pipes[k],HEX);
+  }
+
+}
+
+void command_start() {
+  get_values(strValue);
+
+  char unit = strValue[1] - '0';
+  //Serial.println(unit, DEC);
+  //Serial.println(strValue);
   radio.stopListening();
-  radio.openWritingPipe(listening_pipes[unit]);
+  radio.openWritingPipe(connected_listening_pipes[unit]);
   //unsigned int previousMillis=millis();
-  char outBuffer[32]="";
-  strcat(outBuffer, strValue);
+  char outBuffer[32] = "";
+  outBuffer[0] = 'B';
+  //outBuffer[1] = (char)values[1];
+  outBuffer[1] = (byte)values[1];
+  //Serial.print("Got payload:");
+
+ // Serial.println(outBuffer[1], DEC);
   
   //int latch;
   if ( radio.write( outBuffer, strlen(outBuffer)) ) {
 
-    sprintf(outBuffer,"T%01d/%s",unit,strValue);
+    sprintf(outBuffer, "T%01d/%s", unit, strValue);
     //sprintf(Buffer,"T");
     Serial.println(outBuffer);
   }
   else {
     //latch=previousMillis-millis();
     //sprintf(Buffer,"E%01d/%4d/%s",unit,latch,strValue);
-    sprintf(outBuffer,"E%01d/%s",unit,strValue);
+    sprintf(outBuffer, "E%01d/%s", unit, strValue);
     Serial.println(outBuffer);
-  }  
+  }
 }
 
 
-void nrfhub_data(){
-  uint8_t receivePayload[31];
-  uint8_t len = 1;
-  uint8_t pipe = 1;
 
-    radio.startListening();
-    if ( radio.available( &pipe)  ) {
-  
-      len = radio.getDynamicPayloadSize();
-      radio.read( &receivePayload,len);
-      receivePayload[len] = 0;
-      //printf("%s",receivePayload);
-      Serial.print("Got payload:");
-      Serial.print(receivePayload[0],DEC);
-      Serial.print("   ");
-      Serial.print(receivePayload[1],DEC);
-      Serial.print("   ");
-      Serial.print(receivePayload[2],DEC);
-      Serial.print("   ");
-      printf("len:%i pipe:%i\n\r",len,pipe);
-      //printf("Got payload: %s len:%i pipe:%i\n\r",receivePayload,len,pipe);
-      //Serial.println();
 
-      pipe++;
-      if ( pipe > 6 ) pipe = 1;
-      i++; 
-  
-    }
-}
