@@ -5,7 +5,7 @@
  the packet set has this
 
 
-to make the labview code work you need to download the latest visa 
+to make the labview code work you need to download the latest visa
 
  Max payload size is 32 bytes
 
@@ -37,6 +37,22 @@ https://github.com/jrowberg/i2cdevlib
 
 RF24 radio(9, 10); // Set up nRF24L01 radio on SPI pin for CE, CSN
 
+#if node_type == acc_gyr_mag
+#include "I2Cdev.h"
+#include "MPU6050.h"
+#include "HMC5883L.h"
+#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+#include "Wire.h"
+#endif
+MPU6050 accelgyro;
+HMC5883L mag;
+
+int16_t ax, ay, az;
+int16_t gx, gy, gz;
+int16_t mx, my, mz;
+
+
+#endif
 
 
 
@@ -99,6 +115,14 @@ void setup(void)
 
   radio.startListening();
   radio.printDetails(); // Dump the configuration of the rf unit for debugging
+
+#if node_type == acc_gyr_mag
+
+  accelgyro.initialize();
+  mag.initialize();
+
+
+#endif
   delay(1000);
 }
 
@@ -107,6 +131,94 @@ void loop(void)
 
   command_received();
 
+
+
+#if node_type == acc_gyr_mag
+
+  if (timer_analog_flag == 1) {
+    timer_analog_flag = 0;
+
+    char outBuffer[32] = "";
+    char temp[9];
+
+    accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+    mag.getHeading(&mx, &my, &mz);
+
+    unsigned long currentMillis = millis();
+    send_time = (unsigned long)(currentMillis - previousMillis);
+    previousMillis = currentMillis;
+
+    
+    outBuffer[0]=(char)node_address;
+    outBuffer[1] = (char)send_time;
+    int tempnum=ax;
+    outBuffer[2] = tempnum>>8;
+    outBuffer[3] = ax & 0b0000000011111111;
+
+
+//    
+//    sprintf(outBuffer, "B");
+//    sprintf(temp, "%d", ax);
+//    strcat(outBuffer, temp);
+//    strcat(outBuffer, ",");
+//    sprintf(temp, "%d", ay);
+//    strcat(outBuffer, temp);
+//    //Serial.println(outBuffer);
+//    strcat(outBuffer, ",");
+//    sprintf(temp, "%d", az);
+//    strcat(outBuffer, temp);
+//    strcat(outBuffer, ",");
+//    sprintf(temp, "%d", gx);
+//    strcat(outBuffer, temp);
+//    strcat(outBuffer, ",");
+//    sprintf(temp, "%d", gy);
+//    strcat(outBuffer, temp);
+//    strcat(outBuffer, ",");
+//    sprintf(temp, "%d", gz);
+//    strcat(outBuffer, temp);
+
+    radio.stopListening();
+    radio.write( outBuffer, strlen(outBuffer));
+    printf("outBuffer: %s len: %d\n\r", outBuffer, strlen(outBuffer));
+
+//    sprintf(outBuffer, "G");
+//    sprintf(temp, "%d", mx);
+//    strcat(outBuffer, temp);
+//    strcat(outBuffer, ",");
+//    sprintf(temp, "%d", my);
+//    strcat(outBuffer, temp);
+//    strcat(outBuffer, ",");
+//    sprintf(temp, "%d", mz);
+//    strcat(outBuffer, temp);
+//    radio.write( outBuffer, strlen(outBuffer));
+//    printf("outBuffer: %s len: %d\n\r", outBuffer, strlen(outBuffer));
+
+
+    //
+    //
+    //
+    //    // Stop listening and write to radio
+    //    radio.stopListening();
+    //
+    //    // Send to hub
+    //    if ( radio.write( outBuffer, strlen(outBuffer)) ) {
+    //      printf("Send successful\n\r");
+    //
+    //      //Serial.println(outBuffer);
+    //    }
+    //    else {
+    //      printf("Send failed---------------------------------------------------\n\r");
+    //
+    //    }
+
+
+
+
+    radio.startListening();
+  }
+
+
+#else
   if (timer_analog_flag == 1) {
     timer_analog_flag = 0;
 
@@ -139,7 +251,7 @@ void loop(void)
       counter = 1;
     }
 
-    
+
     unsigned long currentMillis = millis();
 
     send_time = (unsigned long)(currentMillis - previousMillis);
@@ -205,7 +317,7 @@ void loop(void)
 
     radio.startListening();
   }
-
+#endif
 }
 
 
@@ -243,19 +355,19 @@ void command_received() {
 
 
     delay(250);
-    
+
 
   }
 }
 
 void command_start() {
   int timer_config;
-  if (receivePayload[1]>=5) {
-  timer_config=receivePayload[1]*1000;
-  Serial.print(timer_config);
+  if (receivePayload[1] >= 5) {
+    timer_config = receivePayload[1] * 1000;
+    Serial.print(timer_config);
   }
   else {
-    timer_config=default_timer_config;
+    timer_config = default_timer_config;
   }
   Timer1.initialize(timer_config);
   Timer1.attachInterrupt(callback);
