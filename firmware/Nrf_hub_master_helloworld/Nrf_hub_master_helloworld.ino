@@ -188,19 +188,20 @@ void nrfhub_data() {
     radio.read( &receivePayload, len);
     receivePayload[len] = 0;
     //printf("%s",receivePayload);
-    Serial.print("Got payload:");
+    Serial.print("pipe:");
     Serial.print(pipe, DEC);
-    Serial.print("   ");
-    Serial.print(receivePayload[1], DEC);
-    Serial.print("   ");
-    Serial.println(receivePayload[2], DEC);
-    // Serial.print("   ");
+    Serial.print(" Ax=");
+    int tempnum=(receivePayload[1]<<8)|receivePayload[2];
+    Serial.println(tempnum);
+//    Serial.print("   ");
+//    Serial.println(receivePayload[2], DEC);
+//    // Serial.print("   ");
     // printf("len:%i pipe:%i\n\r",len,pipe);
     //printf("Got payload: %s len:%i pipe:%i\n\r",receivePayload,len,pipe);
     //Serial.println();
 
     pipe++;
-    Serial.println(pipe);
+    //Serial.println(pipe);
     if ( pipe > connected_nodes ) pipe = 1;
 
 
