@@ -37,6 +37,9 @@ THE SOFTWARE.
 #include "MPU6050.h"
 #include "HMC5883L.h"
 //#include <TimerOne.h>
+
+
+#define I2CDEV_IMPLEMENTATION I2CDEV_ARDUINO_WIRE
 // Arduino Wire library is required if I2Cdev I2CDEV_ARDUINO_WIRE implementation
 // is used in I2Cdev.h
 #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
@@ -51,9 +54,9 @@ MPU6050 accelgyro;
 HMC5883L mag;
 //MPU6050 accelgyro(0x69); // <-- use for AD0 high
 
-int16_t ax, ay, az;
-int16_t gx, gy, gz;
-int16_t mx, my, mz;
+int16_t ax, ay, az;  //accelerometer
+int16_t gx, gy, gz;  //gyroscope
+int16_t mx, my, mz;  //magnetometer
 int potvalue=A6;
 
 
@@ -84,7 +87,7 @@ void setup() {
     // initialize serial communication
     // (38400 chosen because it works as well at 8MHz as it does at 16MHz, but
     // it's really up to you depending on your project)
-    Serial.begin(115200);
+    Serial.begin(38400);
 
     // initialize device
    // Serial.println("Initializing I2C devices...");
@@ -138,14 +141,14 @@ void loop() {
         Serial.print(az); Serial.print(",");
         Serial.print(gx); Serial.print(",");
         Serial.print(gy); Serial.print(",");
-        Serial.println(gz); 
-//        Serial.print(",");
-//        Serial.print(mx); Serial.print(",");
-//        Serial.print(my); Serial.print(",");
-//        Serial.println(mz); 
+        Serial.print(gz); 
+        Serial.print(",");
+        Serial.print(mx); Serial.print(",");
+        Serial.print(my); Serial.print(",");
+        Serial.println(mz); 
         //Serial.print("A");
         //Serial.println(analogRead(potvalue));
-        delay(5);
+        delay(10);
     #endif
 
     #ifdef OUTPUT_BINARY_ACCELGYRO

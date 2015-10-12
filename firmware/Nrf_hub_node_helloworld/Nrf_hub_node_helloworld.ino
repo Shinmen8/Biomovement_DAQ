@@ -5,7 +5,7 @@
  the packet set has this
 
 
-
+to make the labview code work you need to download the latest visa 
 
  Max payload size is 32 bytes
 
@@ -16,6 +16,8 @@
 timerone library
 https://code.google.com/p/arduino-timerone/downloads/list
 
+mpu6050 library
+https://github.com/jrowberg/i2cdevlib
 
  Written by Papamichalis Pavlos
  pp_papamichalis@hotmail.com
