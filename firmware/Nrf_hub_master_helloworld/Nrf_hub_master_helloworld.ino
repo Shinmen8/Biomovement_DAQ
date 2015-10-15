@@ -168,7 +168,7 @@ void Serial_data() {
     else {
       //latch=previousMillis-millis();
       //sprintf(Buffer,"E%01d/%4d/%s",unit,latch,strValue);
-      sprintf(outBuffer, "E%01d/%s", unit, strValue);
+//      sprintf(outBuffer, "E%01d/%s", unit, strValue);
       Serial.println(outBuffer);
     }
   }
@@ -177,7 +177,7 @@ void Serial_data() {
 
 
 void nrfhub_data() {
-  uint8_t receivePayload[31];
+  uint8_t receivePayload[31]="";
   uint8_t len = 1;
   uint8_t pipe = 1;
 
@@ -187,12 +187,109 @@ void nrfhub_data() {
     len = radio.getDynamicPayloadSize();
     radio.read( &receivePayload, len);
     receivePayload[len] = 0;
-    //printf("%s",receivePayload);
+
+
+
+
+//    Serial.print(receivePayload[2],DEC);
+//    Serial.print("/");
+//    Serial.print(receivePayload[3],DEC);
+//    Serial.print("/");
+//    Serial.print(receivePayload[4],DEC);
+//    Serial.print("/");
+//    Serial.print(receivePayload[5],DEC);
+//    Serial.print("/");
+//    Serial.print(receivePayload[6],DEC);
+//    Serial.print("/");
+//    Serial.print(receivePayload[7],DEC);
+//    Serial.print("/");
+//    Serial.print(receivePayload[8],DEC);
+//    Serial.print("/");
+//    Serial.print(receivePayload[9],DEC);
+//    Serial.print("/");
+//    Serial.print(receivePayload[10],DEC);
+//    Serial.print("/");
+//    Serial.print(receivePayload[11],DEC);
+//    Serial.print("/");
+//    Serial.print(receivePayload[12],DEC);
+//    Serial.print("/");
+//    Serial.print(receivePayload[13],DEC);
+//    Serial.print("/");
+//    Serial.print(receivePayload[14],DEC);
+//    Serial.print("/");
+//    Serial.print(receivePayload[15],DEC);
+//    Serial.print("/");
+//    Serial.print(receivePayload[16],DEC);
+//    Serial.print("/");
+//    Serial.print(receivePayload[17],DEC);
+//    Serial.print("/");
+//    Serial.print(receivePayload[18],DEC);
+//    Serial.print("/");
+//    Serial.println(receivePayload[19],DEC);
+ 
+    //Serial.println(strlen(receivePayload));
+    
+    
     Serial.print("pipe:");
     Serial.print(pipe, DEC);
-    Serial.print(" Ax=");
-    int tempnum=(receivePayload[1]<<8)|receivePayload[2];
+    Serial.print("time:");
+    Serial.print((byte)receivePayload[1]);
+    
+    Serial.print("  ");
+    int tempnum=((byte)receivePayload[2]<<8)+(byte)receivePayload[3];
+    Serial.print(tempnum);
+    
+    Serial.print("/");
+    tempnum=(receivePayload[4]<<8)+receivePayload[5];
+    Serial.print(tempnum);
+    Serial.print("/");
+    tempnum=(receivePayload[6]<<8)+receivePayload[7];
+    Serial.print(tempnum);
+    Serial.print("/");
+    tempnum=(receivePayload[8]<<8)+receivePayload[9];
+    Serial.print(tempnum);
+    Serial.print("/");
+    tempnum=(receivePayload[10]<<8)+receivePayload[11];
+    Serial.print(tempnum);
+    Serial.print("/");
+    tempnum=(receivePayload[12]<<8)+receivePayload[13];
+    Serial.print(tempnum);
+    Serial.print("/");
+    tempnum=(receivePayload[14]<<8)+receivePayload[15];
+    Serial.print(tempnum);
+    Serial.print("/");
+    tempnum=(receivePayload[16]<<8)+receivePayload[17];
+    Serial.print(tempnum);
+    Serial.print("/");
+    tempnum=(receivePayload[18]<<8)+receivePayload[19];
     Serial.println(tempnum);
+
+
+
+//    tempnum=(receivePayload[4]<<8)| receivePayload[5];
+//    Serial.print(tempnum);
+//    Serial.print("/");
+//    tempnum=(receivePayload[6]<<8)| receivePayload[7];
+//    Serial.print(tempnum);
+//    Serial.print("/");
+//    tempnum=(receivePayload[8]<<8)| receivePayload[9];
+//    Serial.print(tempnum);
+//    Serial.print("/");
+//    tempnum=(receivePayload[10]<<8)| receivePayload[11];
+//    Serial.print(tempnum);
+//    Serial.print("/");
+//    tempnum=(receivePayload[12]<<8)| receivePayload[13];
+//    Serial.print(tempnum);
+//    Serial.print("/");
+//    tempnum=(receivePayload[14]<<8)| receivePayload[15];
+//    Serial.print(tempnum);
+//    Serial.print("/");
+//    tempnum=(receivePayload[16]<<8)| receivePayload[17];
+//    Serial.print(tempnum);
+//    Serial.print("/");
+//    tempnum=(receivePayload[18]<<8)| receivePayload[19];
+//    Serial.println(tempnum);
+ 
 //    Serial.print("   ");
 //    Serial.println(receivePayload[2], DEC);
 //    // Serial.print("   ");

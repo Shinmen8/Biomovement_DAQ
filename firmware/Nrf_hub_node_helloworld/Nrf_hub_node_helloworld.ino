@@ -124,6 +124,9 @@ void setup(void)
 
 #endif
   delay(1000);
+
+
+
 }
 
 void loop(void)
@@ -138,7 +141,7 @@ void loop(void)
   if (timer_analog_flag == 1) {
     timer_analog_flag = 0;
 
-    char outBuffer[32] = "";
+    char  outBuffer[32] = "";
     char temp[9];
 
     accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
@@ -148,22 +151,108 @@ void loop(void)
     send_time = (unsigned long)(currentMillis - previousMillis);
     previousMillis = currentMillis;
 
-    
-    outBuffer[0]=(char)node_address;
+
+    outBuffer[0] = (char)node_address;
     outBuffer[1] = (char)send_time;
-    int tempnum=ax;
-    outBuffer[2] = tempnum>>8;
-    outBuffer[3] = ax & 0b0000000011111111;
-
-
+    //unsigned int tempnum1=(unsigned int)ax;
+    //int num=ax;
+    outBuffer[2] = highByte(ax);
+    outBuffer[3] = lowByte(ax);
+    outBuffer[4] = highByte(ay);
+    outBuffer[5] = lowByte(ay);
+    outBuffer[6] = highByte(az);
+    outBuffer[7] = lowByte(az);
+    outBuffer[8] = highByte(gx);
+    outBuffer[9] = lowByte(gx);
+    outBuffer[10] = highByte(gy);
+    outBuffer[11] = lowByte(gy);
+    outBuffer[12] = highByte(gz);
+    outBuffer[13] = lowByte(gz);
+    outBuffer[14] = highByte(mx);
+    outBuffer[15] = lowByte(mx);
+    outBuffer[16] = highByte(my);
+    outBuffer[17] = lowByte(my);
+    outBuffer[18] = highByte(mz);
+    outBuffer[19] = lowByte(mz);
+    
+//    Serial.print((byte)outBuffer[2],DEC);
+//    Serial.print("/");
+//    Serial.print((byte)outBuffer[3],DEC);
+//    Serial.print("/");
+//    Serial.print((byte)outBuffer[4],DEC);
+//    Serial.print("/");
+//    Serial.print((byte)outBuffer[5],DEC);
+//    Serial.print("/");
+//    Serial.print((byte)outBuffer[6],DEC);
+//    Serial.print("/");
+//    Serial.print((byte)outBuffer[7],DEC);
+//    Serial.print("/");
+//    Serial.print((byte)outBuffer[8],DEC);
+//    Serial.print("/");
+//    Serial.print((byte)outBuffer[9],DEC);
+//    Serial.print("/");
+//    Serial.print((byte)outBuffer[10],DEC);
+//    Serial.print("/");
+//    Serial.print((byte)outBuffer[11],DEC);
+//    Serial.print("/");
+//    Serial.print((byte)outBuffer[12],DEC);
+//    Serial.print("/");
+//    Serial.print((byte)outBuffer[13],DEC);
+//    Serial.print("/");
+//    Serial.print((byte)outBuffer[14],DEC);
+//    Serial.print("/");
+//    Serial.print((byte)outBuffer[15],DEC);
+//    Serial.print("/");
+//    Serial.print((byte)outBuffer[16],DEC);
+//    Serial.print("/");
+//    Serial.print((byte)outBuffer[17],DEC);
+//    Serial.print("/");
+//    Serial.print((byte)outBuffer[18],DEC);
+//    Serial.print("/");
+//    Serial.println((byte)outBuffer[19],DEC);
 //    
+    
+//    Serial.print("  ");
+//    
+//    int tempnum=(byte)outBuffer[2]*256+(byte)outBuffer[3];
+//    Serial.print(tempnum);
+//    Serial.print("/");
+//    tempnum=(byte)outBuffer[4]*256+(byte)outBuffer[5];
+//    Serial.print(tempnum);
+//    Serial.print("/");
+//    tempnum=(byte)outBuffer[6]*256+(byte)outBuffer[7];
+//    Serial.print(tempnum);
+//    Serial.print("/");
+//    tempnum=(byte)outBuffer[8]*256+(byte)outBuffer[9];//Serial.print("pipe:");
+//    Serial.print(tempnum);
+//    Serial.print("/");
+//    tempnum=(byte)outBuffer[10]*256+(byte)outBuffer[11];
+//    Serial.print(tempnum);
+//    Serial.print("/");
+//    tempnum=(byte)outBuffer[12]*256+(byte)outBuffer[13];
+//    Serial.print(tempnum);
+//    Serial.print("/");
+//    tempnum=(byte)outBuffer[14]*256+(byte)outBuffer[15];
+//    Serial.print(tempnum);
+//    Serial.print("/");
+//    tempnum=(byte)outBuffer[16]*256+(byte)outBuffer[17];
+//    Serial.print(tempnum);
+//    Serial.print("/");
+//    tempnum=(byte)outBuffer[18]*256+(byte)outBuffer[19];
+//    Serial.println(tempnum);
+//    
+
+
+
+    radio.stopListening();
+    radio.write( outBuffer, 20);
+
 //    sprintf(outBuffer, "B");
 //    sprintf(temp, "%d", ax);
 //    strcat(outBuffer, temp);
 //    strcat(outBuffer, ",");
 //    sprintf(temp, "%d", ay);
 //    strcat(outBuffer, temp);
-//    //Serial.println(outBuffer);
 //    strcat(outBuffer, ",");
 //    sprintf(temp, "%d", az);
 //    strcat(outBuffer, temp);
@@ -177,11 +266,11 @@ void loop(void)
 //    sprintf(temp, "%d", gz);
 //    strcat(outBuffer, temp);
 
-    radio.stopListening();
-    radio.write( outBuffer, strlen(outBuffer));
-    printf("outBuffer: %s len: %d\n\r", outBuffer, strlen(outBuffer));
 
-//    sprintf(outBuffer, "G");
+//    printf("outBuffer: %s len: %d\n\r", outBuffer, strlen(outBuffer));
+//  printf("outBuffer: %s \n", outBuffer);
+//    sprintf(outBuffer, "");
+//    //sprintf(outBuffer, "G");
 //    sprintf(temp, "%d", mx);
 //    strcat(outBuffer, temp);
 //    strcat(outBuffer, ",");
@@ -190,8 +279,8 @@ void loop(void)
 //    strcat(outBuffer, ",");
 //    sprintf(temp, "%d", mz);
 //    strcat(outBuffer, temp);
-//    radio.write( outBuffer, strlen(outBuffer));
-//    printf("outBuffer: %s len: %d\n\r", outBuffer, strlen(outBuffer));
+//    //radio.write( outBuffer, strlen(outBuffer));
+//    printf(",%s len: %d\n\r", outBuffer, strlen(outBuffer));
 
 
     //
