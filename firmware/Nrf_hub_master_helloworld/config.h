@@ -7,7 +7,7 @@
 
 // Radio pipe addresses. You can save here up to 255 different addresses 
 
-
+#define debug_mode // debugging replies
 
 
 
@@ -33,6 +33,31 @@
 
 
 /*
+
+
+ +-------+-------++-------+-------+---------------+             +-------+-------+---------------++---------------+
+ |command||  node||   seperrator  |   number      |             |   seperrator  |   number      ||   end of      |
+ | type  ||   ID ||               |               |  up to      |               |               ||   packet      |
+ +---------------++---------------+---------------+  5 numbers  +---------------+---------------++---------------+
+ |1ascii ||1ascii||    1ascii     | up to 6 digits|  . . .      |    1ascii     | up to 6 digits|| one ascc      |
+ +-+-+-+-+-+-+-+-++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-+-+-+-+-+-+
+ |a to Z ||  1-5 ||     "/"       |number ascii   |             |     "/"       |number ascii   ||  "/n"         |
+ +-------+-------++-------+-------+---------------+             +-------+-------+---------------++---------------+
+
+example
+ "F1/100/101/102/103/104/n"
+ this string will send to node 1 the command assigned to F with 4 different number fields.
+
+C\n search for devices replies with the number of devices 
+B\n
+
+
+
+
+
+
+
+
 
 
 

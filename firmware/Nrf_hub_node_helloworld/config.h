@@ -7,6 +7,10 @@
 #define node_address 2 //1to5
 
 #define node_type acc_gyr_mag
+
+
+#define acc_gyr_mag 1
+
 //#define node_type 3dsensor_Goniometer_emg
 //#define node_type 3dsensor_Goniometer_foot
 //#define node_type balance_board
