@@ -9,7 +9,8 @@
 
 #define debug_mode // debugging replies
 
-
+#define power_led 3
+#define pot_sensor A3
 
 
 

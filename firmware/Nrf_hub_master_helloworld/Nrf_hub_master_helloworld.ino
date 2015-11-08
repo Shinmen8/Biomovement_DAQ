@@ -86,13 +86,15 @@ boolean get_string() {  // receive data from the serial communication
 
 void setup(void)
 {
-
-
+ 
+  
+ 
   Serial.begin(Baudrate);
   printf_begin();
   //while (!Serial) ;
   radio.begin();
 
+ 
   radio.setDataRate(RF24_2MBPS);
   radio.setPALevel(RF24_PA_MAX);
   radio.setChannel(70);

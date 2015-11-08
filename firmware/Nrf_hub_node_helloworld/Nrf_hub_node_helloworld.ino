@@ -37,13 +37,14 @@ https://github.com/jrowberg/i2cdevlib
 
 RF24 radio(9, 10); // Set up nRF24L01 radio on SPI pin for CE, CSN
 
-#if node_type == acc_gyr_mag
+#if node_type == acc_gyr_mag_pot
 #include "I2Cdev.h"
 #include "MPU6050.h"
 #include "HMC5883L.h"
 #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
 #include "Wire.h"
 #endif
+
 MPU6050 accelgyro;
 HMC5883L mag;
 
@@ -92,6 +93,9 @@ void callback()
 
 void setup(void)
 {
+  
+  pinMode(power_led, OUTPUT);
+  digitalWrite(power_led, HIGH); 
   Serial.begin(Baudrate);
 
   printf_begin();
@@ -116,11 +120,10 @@ void setup(void)
   radio.startListening();
   radio.printDetails(); // Dump the configuration of the rf unit for debugging
 
-#if node_type == acc_gyr_mag
+#if node_type == acc_gyr_mag_pot
 
   accelgyro.initialize();
   mag.initialize();
-
 
 #endif
   delay(1000);
@@ -136,7 +139,7 @@ void loop(void)
 
 
 
-#if node_type == acc_gyr_mag
+#if node_type == acc_gyr_mag_pot
 
   if (timer_analog_flag == 1) {
     timer_analog_flag = 0;
@@ -152,7 +155,7 @@ void loop(void)
     previousMillis = currentMillis;
 
 
-    outBuffer[0] = (char)acc_gyr_mag;
+    outBuffer[0] = (char)acc_gyr_mag_pot;
     outBuffer[1] = (char)send_time;
     //unsigned int tempnum1=(unsigned int)ax;
     //int num=ax;
@@ -174,6 +177,7 @@ void loop(void)
     outBuffer[17] = lowByte(my);
     outBuffer[18] = highByte(mz);
     outBuffer[19] = lowByte(mz);
+    outBuffer[20] = goniometer_data();
 
     //    Serial.print((byte)outBuffer[2],DEC);
     //    Serial.print("/");
@@ -245,7 +249,7 @@ void loop(void)
 
 
     radio.stopListening();
-    radio.write( outBuffer, 20);
+    radio.write( outBuffer, 21);
 
     //    sprintf(outBuffer, "B");
     //    sprintf(temp, "%d", ax);
@@ -482,5 +486,11 @@ void command_respond_firmware() {
     printf("fail --------------------------------------------------------\n\r");
 
   }
+}
+
+byte goniometer_data(){
+  int pot_value=analogRead(pot_sensor);
+  byte angle=map(pot_value,pot_mnm_value,pot_max_value,0,255); 
+  return(angle);
 }
 
