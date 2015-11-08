@@ -2,22 +2,28 @@
 #define __config_H
 
 
+//menu
 
+#define node_address 1 //1to5
+//#define node_address 2
+//#define node_address 3
+//#define node_address 4
+//#define node_address 5
 
-#define node_address 2 //1to5
-
-#define node_type acc_gyr_mag_pot
-#define node_type ac_gyr_mag_pot_emg
-#define acc_gyr_mag_pot 1
-
+#define node_type imu_goniometer
+//#define node_type imu_goniometer_emg
+//#define node_type imu_goniometer_foot
+//#define node_type balance_board
+#define imu_goniometer 1
+#define imu_goniometer_emg 2
 
 
 #define power_led 3
 #define pot_sensor A3
 
 
-#define pot_mnm_value 9
-#define pot_max_value 1000
+#define pot_mnm_value 110
+#define pot_max_value 1023
 
 
 

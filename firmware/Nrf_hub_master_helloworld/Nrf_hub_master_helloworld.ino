@@ -144,7 +144,7 @@ void Serial_data() {
     command_start();
   }
   else {  //send the command straigth to the device 
-    char unit = (strValue[1] - '0')+1;
+    char unit = (strValue[1] - '0');
     Serial.println(unit, DEC);
     Serial.println(strValue);
     radio.stopListening();
@@ -257,7 +257,11 @@ void nrfhub_data() {
     Serial.print(tempnum);
     Serial.print("/");
     tempnum = (receivePayload[18] << 8) + receivePayload[19];
+    Serial.print(tempnum);
+    Serial.print("/");
+    tempnum = receivePayload[20];
     Serial.println(tempnum);
+
 
 
 
@@ -390,9 +394,9 @@ void check_connected_nodes() {
   }
 
   connected_nodes = i;
-  //Serial.print("L");
-  //Serial.print("nodes found:");
-  //Serial.println(connected_nodes);
+  Serial.print("L");
+  Serial.print("nodes found:");
+  Serial.println(connected_nodes);
   for (int k = 1; k <= connected_nodes; k++) {
     radio.openReadingPipe(k, connected_talking_pipes[k]);
     Serial.print("D");

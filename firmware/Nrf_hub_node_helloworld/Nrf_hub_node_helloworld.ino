@@ -37,7 +37,7 @@ https://github.com/jrowberg/i2cdevlib
 
 RF24 radio(9, 10); // Set up nRF24L01 radio on SPI pin for CE, CSN
 
-#if node_type == acc_gyr_mag_pot
+#if node_type == imu_goniometer
 #include "I2Cdev.h"
 #include "MPU6050.h"
 #include "HMC5883L.h"
@@ -77,6 +77,7 @@ unsigned long send_time = 0, previousMillis = 0, rtt = 0;
 char receivePayload[32];
 uint8_t counter = 0;
 boolean timer_analog_flag = 0;
+boolean power_led_flag = 0;
 
 void callback()
 {
@@ -93,9 +94,9 @@ void callback()
 
 void setup(void)
 {
-  
+
   pinMode(power_led, OUTPUT);
-  digitalWrite(power_led, HIGH); 
+  digitalWrite(power_led, HIGH);
   Serial.begin(Baudrate);
 
   printf_begin();
@@ -120,7 +121,7 @@ void setup(void)
   radio.startListening();
   radio.printDetails(); // Dump the configuration of the rf unit for debugging
 
-#if node_type == acc_gyr_mag_pot
+#if node_type == imu_goniometer
 
   accelgyro.initialize();
   mag.initialize();
@@ -139,9 +140,12 @@ void loop(void)
 
 
 
-#if node_type == acc_gyr_mag_pot
+#if node_type == imu_goniometer
 
   if (timer_analog_flag == 1) {
+
+    powerled();
+
     timer_analog_flag = 0;
 
     char  outBuffer[32] = "";
@@ -155,7 +159,7 @@ void loop(void)
     previousMillis = currentMillis;
 
 
-    outBuffer[0] = (char)acc_gyr_mag_pot;
+    outBuffer[0] = (char)imu_goniometer;
     outBuffer[1] = (char)send_time;
     //unsigned int tempnum1=(unsigned int)ax;
     //int num=ax;
@@ -178,6 +182,7 @@ void loop(void)
     outBuffer[18] = highByte(mz);
     outBuffer[19] = lowByte(mz);
     outBuffer[20] = goniometer_data();
+    //Serial.println((byte)outBuffer[20], DEC);
 
     //    Serial.print((byte)outBuffer[2],DEC);
     //    Serial.print("/");
@@ -314,8 +319,6 @@ void loop(void)
 #else
   if (timer_analog_flag == 1) {
     timer_analog_flag = 0;
-
-
 
 
     //delay(10); /// !!!!!!!!!!!!!!! this delay must be after the command receive if you send more data in this delay time then the data wont be sent
@@ -488,9 +491,20 @@ void command_respond_firmware() {
   }
 }
 
-byte goniometer_data(){
-  int pot_value=analogRead(pot_sensor);
-  byte angle=map(pot_value,pot_mnm_value,pot_max_value,0,255); 
-  return(angle);
+byte goniometer_data() {
+  int pot_value = analogRead(pot_sensor);
+  byte angle = map(pot_value, pot_mnm_value, pot_max_value, 0, 255);
+  return (angle);
+}
+
+void powerled() {
+  if (power_led_flag == 1) {
+    power_led_flag = 0;
+    digitalWrite(power_led, LOW);
+  }
+  else {
+    power_led_flag = 1;
+    digitalWrite(power_led, HIGH);
+  }
 }
 
