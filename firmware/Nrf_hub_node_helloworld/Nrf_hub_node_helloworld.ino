@@ -128,7 +128,8 @@ void setup(void)
 
 #endif
   delay(1000);
-
+  
+ // command_start();
 
 
 }
