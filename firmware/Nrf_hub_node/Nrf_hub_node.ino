@@ -448,6 +448,7 @@ void command_received() {
         command_stop();
         Serial.println("Stop");
         break;
+    
     }
 
 
@@ -458,10 +459,14 @@ void command_received() {
 }
 
 void command_start() {
-  int timer_config;
+  unsigned long timer_config;
+//  Serial.println(receivePayload[0],DEC);
+//  Serial.println(receivePayload[1],DEC);
+//  Serial.println(receivePayload[2],DEC);
   if (receivePayload[1] >= 5) {
-    timer_config = receivePayload[1] * 1000;
-    Serial.print(timer_config);
+    timer_config = (unsigned long)receivePayload[1] * 1000;
+    
+ //   Serial.println(timer_config);
   }
   else {
     timer_config = default_timer_config;
@@ -470,6 +475,8 @@ void command_start() {
   Timer1.attachInterrupt(callback);
   timer_analog_flag = 0;
 }
+
+
 void command_stop() {
   Timer1.detachInterrupt();
 }

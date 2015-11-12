@@ -52,8 +52,8 @@ uint32_t connected_listening_pipes[6];
 uint8_t  connected_nodes = 0;
 
 
-const char NUMBER_OF_FIELDS = 2; // how many comma separated fields we expect
-int  values[NUMBER_OF_FIELDS];
+const char NUMBER_OF_FIELDS = 4; // how many comma separated fields we expect
+unsigned int  values[NUMBER_OF_FIELDS];
 
 const char MaxChars = 40; // an int string contains up to 5 digits and is terminated by a 0 to indicate end of string
 char strValue[MaxChars + 1]; // must be big enough for digits and terminating null
@@ -143,12 +143,14 @@ void Serial_data() {
   else if (strValue[0] == 'B') { //start data 
     command_start();
   }
+  
   else {  //send the command straigth to the device 
     char unit = (strValue[1] - '0');
     Serial.println(unit, DEC);
     Serial.println(strValue);
     radio.stopListening();
-    radio.openWritingPipe(listening_pipes[unit]);
+    
+    radio.openWritingPipe(connected_listening_pipes[unit]);
     //unsigned int previousMillis=millis();
     char outBuffer[32] = "";
     strcat(outBuffer, strValue);
@@ -315,15 +317,17 @@ boolean get_values(char strValue[30] ) {
 
 
 
-  for (int i = 0; i <= fieldIndex; i++) { //Serial.println(values[i]);
+  for (int i = 0; i <= NUMBER_OF_FIELDS; i++) { 
     values[i] = 0; // set the values to zero, ready for the next message
+   // Serial.println(values[i]);
   }
-  fieldIndex = 0; // ready to start over
-  //  for ( char i=0; i<strlen(strValue); i++){
-  //    Serial.print(strValue[i]);
-  //  }
-  //  Serial.println();
-  // if (get_string()==1){///read a string of alphanumeric
+
+ fieldIndex = 0; // ready to start over
+    for ( char i=0; i<strlen(strValue); i++){
+     // Serial.print(strValue[i]);
+   }
+ //   Serial.println();
+  //if (get_string()==1){///read a string of alphanumeric
   for (char i = 1; i < strlen(strValue) + 1; i++) {
 
     char ch = strValue[i];
@@ -339,16 +343,15 @@ boolean get_values(char strValue[30] ) {
     }
     else
     {
-      //  Serial.print("1= ");
-      //   Serial.println(values[0]);
-      //    Serial.print("2= ");
-      //     Serial.println(values[1]);
-      //      Serial.print("3= ");
-      //      Serial.println(values[2]);
-      //      Serial.print("4= ");
-      //      Serial.println(values[3]);
-      //      Serial.print("5= ");
-      //      Serial.println(values[4]);
+//        Serial.print("1= ");
+//         Serial.println(values[0]);
+//          Serial.print("2= ");
+//           Serial.println(values[1]);
+//            Serial.print("3= ");
+//            Serial.println(values[2]);
+//            Serial.print("4= ");
+//            Serial.println(values[3]);
+  
 
     }
   }
@@ -363,6 +366,11 @@ void check_connected_nodes() {
   Serial.print("L");
   Serial.println("searching for devices");
   uint8_t i = 0;
+  for (int n=1; n<=5; n++){
+    connected_listening_pipes[n]=0;
+    connected_talking_pipes[n]=0;
+  }
+  
 
   for (int address = 1; address <= 6; address++) {
 
@@ -397,14 +405,24 @@ void check_connected_nodes() {
   Serial.print("L");
   Serial.print("nodes found:");
   Serial.println(connected_nodes);
-  for (int k = 1; k <= connected_nodes; k++) {
+  for (int k = 1; k <= 5; k++) {
     radio.openReadingPipe(k, connected_talking_pipes[k]);
+    if (k<=connected_nodes){
     Serial.print("D");
-    Serial.println(k);
-    Serial.print("L");
+    Serial.print(k);
+    Serial.print(" ");
     Serial.print(connected_talking_pipes[k], HEX);
-    Serial.print("   ");
+    Serial.print(" ");
     Serial.println(connected_listening_pipes[k], HEX);
+    }
+    else {
+    Serial.print("L");
+    Serial.print(k);
+    Serial.print(" ");
+    Serial.print(connected_talking_pipes[k], HEX);
+    Serial.print(" ");
+    Serial.println(connected_listening_pipes[k], HEX);
+    }
   }
 }
 
@@ -421,9 +439,9 @@ void command_start() {
   outBuffer[0] = 'B';
   //outBuffer[1] = (char)values[1];
   outBuffer[1] = (byte)values[1];
-  //Serial.print("Got payload:");
+  Serial.print("Got payload:");
 
-  // Serial.println(outBuffer[1], DEC);
+  Serial.println(outBuffer[1], DEC);
 
   //int latch;
   if ( radio.write( outBuffer, strlen(outBuffer)) ) {
@@ -439,6 +457,7 @@ void command_start() {
     Serial.println(outBuffer);
   }
 }
+
 
 
 
